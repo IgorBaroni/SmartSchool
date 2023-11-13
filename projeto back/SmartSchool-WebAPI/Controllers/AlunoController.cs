@@ -77,7 +77,7 @@ namespace SmartSchool_WebAPI.Controllers
 
             return BadRequest();
         }
-
+        
         [HttpPut("{AlunoId}")]
         public async Task<IActionResult> Put(int AlunoId, Aluno model)
         {
@@ -115,7 +115,7 @@ namespace SmartSchool_WebAPI.Controllers
 
                 if(await _repository.SaveChangesAsync())
                 {
-                    return Ok("Deletado");
+                    return Ok(new { message = "Deletado" });
                 }
             }
             catch (Exception ex)

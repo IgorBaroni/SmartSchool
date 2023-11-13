@@ -1,7 +1,8 @@
-import { Component, OnInit, TemplateRef } from '@angular/core';
+import { Component, Input, OnInit, TemplateRef } from '@angular/core';
 import { Aluno } from '../models/Aluno';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
+import { AlunoService } from './aluno.service';
 
 
 
@@ -11,6 +12,8 @@ import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
   styleUrls: ['./alunos.component.css']
 })
 export class AlunosComponent implements OnInit {
+
+  @Input() botoes: boolean | undefined;
 
   public modalRef?: BsModalRef;
 
@@ -22,23 +25,29 @@ export class AlunosComponent implements OnInit {
 
   public textSimple: string | undefined;
 
+  public modo?= 'post';
 
-  public alunos = [
-    { id: 1, nome: 'Marta', sobrenome: 'Kent', telefone: '492853256' },
-    { id: 2, nome: 'Paula', sobrenome: 'Isabela', telefone: '847572845' },
-    { id: 3, nome: 'Laura', sobrenome: 'Antonia', telefone: '322345849' },
-    { id: 4, nome: 'Luiza', sobrenome: 'Maria', telefone: '482759202' },
-    { id: 5, nome: 'Lucas', sobrenome: 'Machado', telefone: '194720475' },
-    { id: 6, nome: 'Pedro', sobrenome: 'Alvares', telefone: '385627456' },
-    { id: 7, nome: 'Paulo', sobrenome: 'José', telefone: '274859376' },
-  ];
 
-  
-  constructor(private fb: FormBuilder, private modalService: BsModalService) {
+  public alunos: Aluno[] | undefined;
+
+
+  constructor(private fb: FormBuilder, private modalService: BsModalService, private alunoService: AlunoService) {
     this.criarForm();
   }
 
   ngOnInit() {
+    this.carregarAlunos();
+  }
+
+  carregarAlunos() {
+    this.alunoService.getAll().subscribe(
+      (alunos: Aluno[]) => {
+        this.alunos = alunos;
+      },
+      (erro: any) => {
+        console.error(erro);
+      }
+    );
   }
 
   openModal(template: TemplateRef<any>) {
@@ -47,19 +56,72 @@ export class AlunosComponent implements OnInit {
 
   criarForm() {
     this.alunoForm = this.fb.group({
+      id: [''],
       nome: ['', Validators.required],
       sobrenome: ['', Validators.required],
-      telefone: ['', Validators.required]
+      telefone: ['', Validators.required],
+      alunosDisciplinas: [null]
     });
   }
 
+  salvarAluno(aluno: Aluno) {
+    (aluno.id === 0) ? this.modo = 'post' : this.modo = 'put';
+
+    if (this.modo == 'post') {
+      this.alunoService.post(aluno).subscribe(
+        (retorno: Aluno | any) => {
+          console.log(retorno);
+          this.carregarAlunos();
+        },
+        (erro: any) => {
+          console.log(erro);
+        }
+      );
+    }
+
+    else if (this.modo == 'put') {
+      aluno.alunosDisciplinas = []
+      this.alunoService.put(aluno).subscribe(
+        (retorno: Aluno | any) => {
+          console.log(retorno);
+          this.carregarAlunos();
+        },
+        (erro: any) => {
+          console.log(erro);
+        }
+      );
+    }
+
+  }
+
+  deletarAluno(id: number, aluno: Aluno) {
+    let r = confirm(`Remover aluno ${aluno.nome} ?`);
+    if (r) {
+      this.alunoService.delete(id).subscribe(
+        (model: any) => {
+          console.log(model);
+          this.carregarAlunos();
+        },
+        (erro: any) => {
+          console.log(erro)
+        }
+      )
+      alert(`Aluno ${aluno.nome} removido com sucesso!`);
+    }
+  }
+
   alunoSubmit() {
-    console.log(this.alunoForm?.value);
+    this.salvarAluno(this.alunoForm.value);
   }
 
   alunoSelect(aluno: Aluno) {
     this.alunoSelecionado = aluno;
     this.alunoForm.patchValue(aluno);
+  }
+
+  alunoNovo() {
+    this.alunoSelecionado = new Aluno();
+    this.alunoForm.patchValue(this.alunoSelecionado);
   }
 
   voltar() {

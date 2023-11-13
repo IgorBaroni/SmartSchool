@@ -2,7 +2,7 @@
 
   <div class="col-sm-6" *ngIf="alunoSelecionado">
     <div class="position-relative">
-      <div class="mr-auto"><app-titulo [titulo]="'Cód. Aluno: ' + alunoSelecionado.id"></app-titulo></div>
+      <div class="mr-auto"><app-titulo [titulo]="(alunoSelecionado.id === 0 ? 'Novo Aluno' : 'Cód. Aluno: ' + alunoSelecionado.id)"></app-titulo></div>
       <div class="mt-2 position-absolute top-0 end-0"><button class="btn btn-sm btn-outline-danger"
           (click)="voltar()">Fechar</button>
       </div>
@@ -23,13 +23,16 @@
       </div>
       <div class="form-group">
         <hr>
-        <button class="btn btn-success" [disabled]="!alunoForm.valid">Enviar</button>
+        <button class="btn btn-success" [disabled]="!alunoForm.valid">Salvar</button>
       </div>
     </form>
   </div>
 
   <div [ngClass]="{'col-sm-6': alunoSelecionado, 'col-sm-12': !alunoSelecionado}">
-    <app-titulo [titulo]="titulo"></app-titulo>
+    <app-titulo [titulo]="titulo">
+      <div *ngIf="!botoes" class="mt-2 position-absolute top-0 end-0"><button class="btn btn-sm btn-outline-success z-index-modal"
+        (click)="alunoNovo()">Cadastrar Aluno</button>
+    </div></app-titulo>
 
     <table class="table table-hover">
       <thead class="table-light">
@@ -38,7 +41,7 @@
           <th scope="col">Nome</th>
           <th scope="col">Sobrenome</th>
           <th scope="col">Telefone</th>
-          <th scope="col">Opções</th>
+          <th *ngIf="!botoes" scope="col">Opções</th>
         </tr>
       </thead>
       <tbody>
@@ -47,13 +50,13 @@
           <td>{{aluno.nome}}</td>
           <td>{{aluno.sobrenome}}</td>
           <td>{{aluno.telefone}}</td>
-          <td>
+          <td *ngIf="!botoes">
             <div class="btn-group gap-2">
               <button class="btn btn-sm btn-primary rounded" title="Editar Informações" (click)="alunoSelect(aluno)"><i
                   class="bi bi-pencil-square" style="color: #fff; font-size: 15px;"></i></button>
               <button class="btn btn-sm btn-warning rounded" title="Ver Professores" (click)="openModal(template)"><i
                   class="bi bi-people-fill" style="color: #fff; font-size: 15px;"></i></button>
-              <button class="btn btn-sm btn-danger rounded" title="Desativar Aluno"><i class="bi bi-ban"
+              <button class="btn btn-sm btn-danger rounded" title="Deletar Aluno" (click)="deletarAluno(aluno.id, aluno)"><i class="bi bi-ban"
                   style="color: #fff; font-size: 15px;"></i></button>
             </div>
           </td>
@@ -65,14 +68,11 @@
 
 <ng-template #template>
   <div class="modal-body">
-    <div class="mt-2 me-2 position-absolute top-0 end-0">
+    <div class="z-2 mt-2 me-2 position-absolute top-0 end-0">
       <button type="button" class="btn btn-danger pull-right" aria-label="Close" (click)="modalRef?.hide()">
         <i class="bi bi-x" style="color: #fff; font-size: 20px;"></i>
       </button>
     </div>
-    <app-professores></app-professores>
-  </div>
-  <div class="modal-footer">
-
+    <app-professores [botoes]="true"></app-professores>
   </div>
 </ng-template>

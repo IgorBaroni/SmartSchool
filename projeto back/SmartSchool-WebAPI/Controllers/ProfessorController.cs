@@ -84,7 +84,7 @@ namespace SmartSchool_WebAPI.Controllers
         {
             try
             {
-                var prof = await _repository.GetAlunoAsyncById(ProfessorId, false);
+                var prof = await _repository.GetProfessoresAsyncById(ProfessorId, false);
                 
                 if(prof == null) return NotFound("Professor não encontrado");
 
@@ -116,7 +116,7 @@ namespace SmartSchool_WebAPI.Controllers
 
                 if(await _repository.SaveChangesAsync())
                 {
-                    return Ok("Deletado");
+                    return Ok(new { message = "Deletado" });
                 }
             }
             catch (Exception ex)
